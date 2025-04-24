@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Streamlit secret file
+# https://docs.streamlit.io/develop/concepts/connections/secrets-management
+
+.streamlit/secrets.toml
