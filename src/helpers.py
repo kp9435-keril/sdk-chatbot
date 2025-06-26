@@ -21,8 +21,9 @@ class StreamlitSecretsHelper:
         return StreamlitSecretsHelper.get_secret(AZURE_OPENAI_API_MODEL)
     
     @staticmethod
-    def get_azure_vector_store_id() -> str:
-        return StreamlitSecretsHelper.get_secret(AZURE_VECTOR_STORE_ID)
+    def get_vector_store_id_list() -> list[str]:
+        csv_string = StreamlitSecretsHelper.get_secret(VECTOR_STORE_ID_LIST)
+        return [item.strip() for item in csv_string.split(",") if item.strip()]
 
     @staticmethod
     def get_secret(name: str) -> Any:

@@ -11,7 +11,7 @@ class AzureOpenAIClient:
         self.endpoint = StreamlitSecretsHelper.get_azure_openai_endpoint()
         self.api_version = StreamlitSecretsHelper.get_azure_openai_api_version()
         self.model = StreamlitSecretsHelper.get_azure_openai_model()
-        self.azure_vector_store_id = StreamlitSecretsHelper.get_azure_vector_store_id()
+        self.azure_vector_store_id_list = StreamlitSecretsHelper.get_vector_store_id_list()
 
         self.client = AzureOpenAI(
             azure_endpoint=self.endpoint,
@@ -29,7 +29,7 @@ class AzureOpenAIClient:
             tools=[
                 {
                     "type": "file_search",
-                    "vector_store_ids": [self.azure_vector_store_id]
+                    "vector_store_ids": self.azure_vector_store_id_list
                 }
             ],
             previous_response_id=previous_response_id,

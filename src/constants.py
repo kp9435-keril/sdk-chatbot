@@ -3,7 +3,7 @@ AZURE_OPENAI_API_KEY = "azure_openai_api_key"
 AZURE_OPENAI_ENDPOINT = "azure_openai_endpoint"
 AZURE_OPENAI_API_VERSION = "azure_openai_api_version"
 AZURE_OPENAI_API_MODEL = "azure_openai_api_model"
-AZURE_VECTOR_STORE_ID = "azure_vector_store_id"
+VECTOR_STORE_ID_LIST = "azure_vector_store_id_list"
 
 # Initial Constants for the Assistant
 INITIAL_SUGGESTIONS = [
