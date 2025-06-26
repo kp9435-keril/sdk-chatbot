@@ -49,7 +49,7 @@ class AzureOpenAIClient:
             tools=[
                 {
                     "type": "file_search",
-                    "vector_store_ids": [self.azure_vector_store_id]
+                    "vector_store_ids": self.azure_vector_store_id_list
                 }
             ],
             text_format=Suggestions
