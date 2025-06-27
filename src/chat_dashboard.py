@@ -2,6 +2,9 @@ import streamlit as st
 from constants import *
 from azure_openai_client import AzureOpenAIClient
 
+st.session_state.messages = INITAL_MESSAGE_LIST
+st.session_state.suggestions = INITIAL_SUGGESTIONS
+st.session_state.previous_response_id = None
 
 def on_submit():
     """
@@ -42,15 +45,6 @@ st.set_page_config(
     page_icon=":speech_balloon:",
     layout="wide",
 )
-
-if "messages" not in st.session_state:
-    st.session_state.messages = INITAL_MESSAGE_LIST
-
-if "suggestions" not in st.session_state:
-    st.session_state.suggestions = INITIAL_SUGGESTIONS
-
-if "previous_response_id" not in st.session_state:
-    st.session_state.previous_response_id = None
 
 for message in st.session_state.messages:
     if message["role"] == "assistant":
