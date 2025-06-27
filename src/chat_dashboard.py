@@ -88,11 +88,6 @@ with col2:
     if st.button("🔄 Reset", help="Clear conversation history"):
         reset_conversation()
 
-# Display session info in sidebar for debugging (remove in production)
-with st.sidebar:
-    st.write(f"Session ID: {st.session_state.get('user_session_id', 'Not set')[:8]}...")
-    st.write(f"Messages: {len(st.session_state.get('messages', []))}")
-
 for message in st.session_state.messages:
     if message["role"] == "assistant":
         with st.chat_message("assistant"):
@@ -134,4 +129,7 @@ with st._bottom:
             )
         
         st.write("Kindly wait after clicking submit button, it may take a few seconds to respond.")
+        
+        # Display session info at the bottom for debugging (remove in production)
+        st.caption(f"Session: {st.session_state.get('user_session_id', 'Not set')[:8]}... | Messages: {len(st.session_state.get('messages', []))}")
         
