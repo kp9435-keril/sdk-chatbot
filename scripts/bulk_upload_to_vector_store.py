@@ -8,7 +8,8 @@ import getpass
 # - Azure Endpoint  
 # - API Version
 # - Directory Path
-# - Vector Store Name
+# - Vector Store Option (Create new or use existing)
+# - Vector Store Name (if creating new) OR Vector Store ID (if using existing)
 # ===================================
 
 def get_user_configuration():
@@ -47,19 +48,48 @@ def get_user_configuration():
         print("Directory path is required.")
         directory_path = input("Enter directory path containing files to upload: ").strip()
     
-    # Get Vector Store Name
-    vector_store_name = input("Enter vector store name: ").strip()
-    while not vector_store_name:
-        print("Vector store name is required.")
-        vector_store_name = input("Enter vector store name: ").strip()
+    # Ask if user wants to create new vector store or use existing one
+    print("\n📂 Vector Store Options:")
+    print("1. Create a new vector store")
+    print("2. Upload to existing vector store")
+    choice = input("Select option (1 or 2): ").strip()
     
-    return {
-        'api_key': api_key,
-        'api_version': api_version,
-        'azure_endpoint': azure_endpoint,
-        'directory_path': directory_path,
-        'vector_store_name': vector_store_name
-    }
+    while choice not in ['1', '2']:
+        print("Invalid choice. Please enter 1 or 2.")
+        choice = input("Select option (1 or 2): ").strip()
+    
+    if choice == '1':
+        # Get Vector Store Name for new store
+        vector_store_name = input("Enter vector store name: ").strip()
+        while not vector_store_name:
+            print("Vector store name is required.")
+            vector_store_name = input("Enter vector store name: ").strip()
+        
+        return {
+            'api_key': api_key,
+            'api_version': api_version,
+            'azure_endpoint': azure_endpoint,
+            'directory_path': directory_path,
+            'vector_store_name': vector_store_name,
+            'vector_store_id': None,
+            'use_existing': False
+        }
+    else:
+        # Get Vector Store ID for existing store
+        vector_store_id = input("Enter existing vector store ID: ").strip()
+        while not vector_store_id:
+            print("Vector store ID is required.")
+            vector_store_id = input("Enter existing vector store ID: ").strip()
+        
+        return {
+            'api_key': api_key,
+            'api_version': api_version,
+            'azure_endpoint': azure_endpoint,
+            'directory_path': directory_path,
+            'vector_store_name': None,
+            'vector_store_id': vector_store_id,
+            'use_existing': True
+        }
 
 def initialize_client(config):
     """
@@ -95,9 +125,9 @@ def get_files_from_directory(directory_path):
         print(f"Error reading directory: {e}")
         return []
 
-def upload_files_to_vector_store(client, directory_path, vector_store_name):
+def upload_files_to_vector_store(client, directory_path, vector_store_name=None, vector_store_id=None):
     """
-    Upload all files from a directory to a new vector store in Azure OpenAI.
+    Upload all files from a directory to a new or existing vector store in Azure OpenAI.
     Files are uploaded in batches of 250 to avoid API service limitations.
     """
     print(f"Starting bulk upload from directory: {directory_path}")
@@ -121,12 +151,29 @@ def upload_files_to_vector_store(client, directory_path, vector_store_name):
         print(f"  - {os.path.basename(file_path)}")
     
     try:
-        print(f"\nCreating vector store: '{vector_store_name}'")
-        # Create a vector store
-        vector_store = client.vector_stores.create(name=vector_store_name)
-        print(f"✓ Vector store created with ID: {vector_store.id}")
+        if vector_store_id:
+            # Use existing vector store
+            print(f"\nUsing existing vector store with ID: {vector_store_id}")
+            try:
+                vector_store = client.vector_stores.retrieve(vector_store_id)
+                print(f"✓ Vector store retrieved: {vector_store.name} (ID: {vector_store.id})")
+            except Exception as e:
+                print(f"✗ Error retrieving vector store with ID {vector_store_id}: {e}")
+                return {
+                    'success': False,
+                    'vector_store': None,
+                    'file_batches': [],
+                    'total_files': len(file_paths),
+                    'successful_uploads': 0,
+                    'failed_uploads': len(file_paths)
+                }
+        else:
+            # Create new vector store
+            print(f"\nCreating vector store: '{vector_store_name}'")
+            vector_store = client.vector_stores.create(name=vector_store_name)
+            print(f"✓ Vector store created with ID: {vector_store.id}")
         
-        # Split files into batches of 250
+        # ...existing upload logic... Split files into batches of 250
         batch_size = 250
         total_files = len(file_paths)
         total_batches = (total_files + batch_size - 1) // batch_size  # Ceiling division
@@ -232,11 +279,25 @@ if __name__ == "__main__":
     # Show configuration and confirm before proceeding
     print(f"\nConfiguration Summary:")
     print(f"Directory: {config['directory_path']}")
-    print(f"Vector Store Name: {config['vector_store_name']}")
+    if config['use_existing']:
+        print(f"Vector Store ID: {config['vector_store_id']}")
+    else:
+        print(f"Vector Store Name: {config['vector_store_name']}")
     confirmation = input("\nProceed with upload? Type 'YES' to confirm: ")
     
     if confirmation == "YES":
-        result = upload_files_to_vector_store(client, config['directory_path'], config['vector_store_name'])
+        if config['use_existing']:
+            result = upload_files_to_vector_store(
+                client, 
+                config['directory_path'], 
+                vector_store_id=config['vector_store_id']
+            )
+        else:
+            result = upload_files_to_vector_store(
+                client, 
+                config['directory_path'], 
+                vector_store_name=config['vector_store_name']
+            )
         if result['success']:
             print(f"\n✅ Upload completed successfully!")
             print(f"Vector Store ID: {result['vector_store'].id}")
