@@ -128,7 +128,7 @@ with st._bottom:
                 on_click=on_submit,
             )
         
-        st.write("Kindly wait after clicking submit button, it may take a few seconds to respond.")
+        st.write("Please wait after clicking submit button, it may take a few seconds to respond.")
         
         # Display session info at the bottom for debugging (remove in production)
         st.caption(f"Session: {st.session_state.get('user_session_id', 'Not set')[:8]}... | Messages: {len(st.session_state.get('messages', []))}")
